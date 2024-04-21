@@ -6,7 +6,8 @@
 #include<stdio.h>
 #include<stdlib.h>
 #define REALOC_SIZE 256
-#include "functions.h"
+#include "Cdataframe.c"
+#include "column.c"
 
 int main() {
     COLUMN *col = create_column(char* title)
