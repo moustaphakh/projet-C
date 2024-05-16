@@ -137,4 +137,4 @@ int countValuesEqualToX(int array[], int size, int x);
 return 0;
 }
 
->>>>>>> e929b8b6a3eb984253c4c7a46e0a0dfa906d7c08
+
