@@ -1,0 +1,159 @@
+<html>
+<head>
+<title>Cdataframe.c</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #b3ae60;}
+.s1 { color: #bcbec4;}
+.s2 { color: #6aab73;}
+.s3 { color: #bcbec4;}
+.s4 { color: #cf8e6d;}
+.s5 { color: #2aacb8;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+Cdataframe.c</font>
+</center></td></tr></table>
+<pre><span class="s0">#include </span><span class="s2">&quot;cdataframe.h&quot;</span>
+<span class="s0">#include </span><span class="s2">&lt;stdio.h&gt;</span>
+<span class="s0">#include </span><span class="s2">&lt;stdlib.h&gt;</span>
+<span class="s0">#include </span><span class="s2">&lt;string.h&gt;</span>
+
+<span class="s1">CDataframe </span><span class="s3">*</span><span class="s1">create_cdataframe</span><span class="s3">(</span><span class="s4">int </span><span class="s1">initial_capacity</span><span class="s3">) {</span>
+    <span class="s1">CDataframe </span><span class="s3">*</span><span class="s1">df </span><span class="s3">= (</span><span class="s1">CDataframe </span><span class="s3">*)</span><span class="s1">malloc</span><span class="s3">(</span><span class="s4">sizeof</span><span class="s3">(</span><span class="s1">CDataframe</span><span class="s3">));</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">df </span><span class="s3">== </span><span class="s1">NULL</span><span class="s3">) {</span>
+        <span class="s4">return </span><span class="s1">NULL</span><span class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns </span><span class="s3">= (</span><span class="s1">COLUMN </span><span class="s3">**)</span><span class="s1">malloc</span><span class="s3">(</span><span class="s1">initial_capacity </span><span class="s3">* </span><span class="s4">sizeof</span><span class="s3">(</span><span class="s1">COLUMN </span><span class="s3">*));</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns </span><span class="s3">== </span><span class="s1">NULL</span><span class="s3">) {</span>
+        <span class="s1">free</span><span class="s3">(</span><span class="s1">df</span><span class="s3">);</span>
+        <span class="s4">return </span><span class="s1">NULL</span><span class="s3">;</span>
+    <span class="s3">}</span>
+
+    <span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">num_columns </span><span class="s3">= </span><span class="s5">0</span><span class="s3">;</span>
+    <span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">capacity </span><span class="s3">= </span><span class="s1">initial_capacity</span><span class="s3">;</span>
+    <span class="s4">return </span><span class="s1">df</span><span class="s3">;</span>
+<span class="s3">}</span>
+
+<span class="s4">void </span><span class="s1">delete_cdataframe</span><span class="s3">(</span><span class="s1">CDataframe </span><span class="s3">*</span><span class="s1">df</span><span class="s3">) {</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">df </span><span class="s3">!= </span><span class="s1">NULL</span><span class="s3">) {</span>
+        <span class="s4">for </span><span class="s3">(</span><span class="s4">int </span><span class="s1">i </span><span class="s3">= </span><span class="s5">0</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">num_columns</span><span class="s3">; </span><span class="s1">i</span><span class="s3">++) {</span>
+            <span class="s1">delete_column</span><span class="s3">(&amp;</span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns</span><span class="s3">[</span><span class="s1">i</span><span class="s3">]);</span>
+        <span class="s3">}</span>
+        <span class="s1">free</span><span class="s3">(</span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns</span><span class="s3">);</span>
+        <span class="s1">free</span><span class="s3">(</span><span class="s1">df</span><span class="s3">);</span>
+    <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s4">void </span><span class="s1">hard_fill_cdataframe</span><span class="s3">(</span><span class="s1">CDataframe </span><span class="s3">*</span><span class="s1">df</span><span class="s3">, </span><span class="s4">int </span><span class="s1">num_columns</span><span class="s3">, </span><span class="s4">int </span><span class="s1">num_rows</span><span class="s3">) {</span>
+    <span class="s4">for </span><span class="s3">(</span><span class="s4">int </span><span class="s1">i </span><span class="s3">= </span><span class="s5">0</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span class="s1">num_columns</span><span class="s3">; </span><span class="s1">i</span><span class="s3">++) {</span>
+        <span class="s4">char </span><span class="s1">title</span><span class="s3">[</span><span class="s5">20</span><span class="s3">];</span>
+        <span class="s1">sprintf</span><span class="s3">(</span><span class="s1">title</span><span class="s3">, </span><span class="s2">&quot;Column%d&quot;</span><span class="s3">, </span><span class="s1">i </span><span class="s3">+ </span><span class="s5">1</span><span class="s3">);</span>
+
+        <span class="s1">COLUMN </span><span class="s3">*</span><span class="s1">col </span><span class="s3">= </span><span class="s1">create_column</span><span class="s3">(</span><span class="s1">title</span><span class="s3">);</span>
+        <span class="s4">for </span><span class="s3">(</span><span class="s4">int </span><span class="s1">j </span><span class="s3">= </span><span class="s5">0</span><span class="s3">; </span><span class="s1">j </span><span class="s3">&lt; </span><span class="s1">num_rows</span><span class="s3">; </span><span class="s1">j</span><span class="s3">++) {</span>
+            <span class="s1">insert_value</span><span class="s3">(</span><span class="s1">col</span><span class="s3">, </span><span class="s1">i </span><span class="s3">* </span><span class="s1">num_rows </span><span class="s3">+ </span><span class="s1">j </span><span class="s3">+ </span><span class="s5">1</span><span class="s3">);</span>
+        <span class="s3">}</span>
+        <span class="s1">add_column_to_cdataframe</span><span class="s3">(</span><span class="s1">df</span><span class="s3">, </span><span class="s1">col</span><span class="s3">);</span>
+    <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s4">void </span><span class="s1">display_cdataframe</span><span class="s3">(</span><span class="s4">const </span><span class="s1">CDataframe </span><span class="s3">*</span><span class="s1">df</span><span class="s3">) {</span>
+    <span class="s4">for </span><span class="s3">(</span><span class="s4">int </span><span class="s1">i </span><span class="s3">= </span><span class="s5">0</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">num_columns</span><span class="s3">; </span><span class="s1">i</span><span class="s3">++) {</span>
+        <span class="s1">print_col</span><span class="s3">(</span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns</span><span class="s3">[</span><span class="s1">i</span><span class="s3">]);</span>
+    <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s4">void </span><span class="s1">display_partial_cdataframe</span><span class="s3">(</span><span class="s4">const </span><span class="s1">CDataframe </span><span class="s3">*</span><span class="s1">df</span><span class="s3">, </span><span class="s4">int </span><span class="s1">start_row</span><span class="s3">, </span><span class="s4">int </span><span class="s1">end_row</span><span class="s3">, </span><span class="s4">int </span><span class="s1">start_col</span><span class="s3">, </span><span class="s4">int </span><span class="s1">end_col</span><span class="s3">) {</span>
+    <span class="s4">for </span><span class="s3">(</span><span class="s4">int </span><span class="s1">i </span><span class="s3">= </span><span class="s1">start_col</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&lt;= </span><span class="s1">end_col </span><span class="s3">&amp;&amp; </span><span class="s1">i </span><span class="s3">&lt; </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">num_columns</span><span class="s3">; </span><span class="s1">i</span><span class="s3">++) {</span>
+        <span class="s1">printf</span><span class="s3">(</span><span class="s2">&quot;Column: %s</span><span class="s4">\n</span><span class="s2">&quot;</span><span class="s3">, </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns</span><span class="s3">[</span><span class="s1">i</span><span class="s3">]-&gt;</span><span class="s1">title</span><span class="s3">);</span>
+        <span class="s1">printf</span><span class="s3">(</span><span class="s2">&quot;Values: &quot;</span><span class="s3">);</span>
+        <span class="s4">for </span><span class="s3">(</span><span class="s4">int </span><span class="s1">j </span><span class="s3">= </span><span class="s1">start_row</span><span class="s3">; </span><span class="s1">j </span><span class="s3">&lt;= </span><span class="s1">end_row </span><span class="s3">&amp;&amp; </span><span class="s1">j </span><span class="s3">&lt; </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns</span><span class="s3">[</span><span class="s1">i</span><span class="s3">]-&gt;</span><span class="s1">size</span><span class="s3">; </span><span class="s1">j</span><span class="s3">++) {</span>
+            <span class="s1">printf</span><span class="s3">(</span><span class="s2">&quot;%d &quot;</span><span class="s3">, </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns</span><span class="s3">[</span><span class="s1">i</span><span class="s3">]-&gt;</span><span class="s1">values</span><span class="s3">[</span><span class="s1">j</span><span class="s3">]);</span>
+        <span class="s3">}</span>
+        <span class="s1">printf</span><span class="s3">(</span><span class="s2">&quot;</span><span class="s4">\n</span><span class="s2">&quot;</span><span class="s3">);</span>
+    <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s4">void </span><span class="s1">add_row_to_cdataframe</span><span class="s3">(</span><span class="s1">CDataframe </span><span class="s3">*</span><span class="s1">df</span><span class="s3">, </span><span class="s4">int </span><span class="s3">*</span><span class="s1">row_values</span><span class="s3">) {</span>
+    <span class="s4">for </span><span class="s3">(</span><span class="s4">int </span><span class="s1">i </span><span class="s3">= </span><span class="s5">0</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">num_columns</span><span class="s3">; </span><span class="s1">i</span><span class="s3">++) {</span>
+        <span class="s1">insert_value</span><span class="s3">(</span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns</span><span class="s3">[</span><span class="s1">i</span><span class="s3">], </span><span class="s1">row_values</span><span class="s3">[</span><span class="s1">i</span><span class="s3">]);</span>
+    <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s4">void </span><span class="s1">delete_row_from_cdataframe</span><span class="s3">(</span><span class="s1">CDataframe </span><span class="s3">*</span><span class="s1">df</span><span class="s3">, </span><span class="s4">int </span><span class="s1">row_index</span><span class="s3">) {</span>
+    <span class="s4">for </span><span class="s3">(</span><span class="s4">int </span><span class="s1">i </span><span class="s3">= </span><span class="s5">0</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">num_columns</span><span class="s3">; </span><span class="s1">i</span><span class="s3">++) {</span>
+        <span class="s1">COLUMN </span><span class="s3">*</span><span class="s1">col </span><span class="s3">= </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns</span><span class="s3">[</span><span class="s1">i</span><span class="s3">];</span>
+        <span class="s4">if </span><span class="s3">(</span><span class="s1">row_index </span><span class="s3">&lt; </span><span class="s1">col</span><span class="s3">-&gt;</span><span class="s1">size</span><span class="s3">) {</span>
+            <span class="s4">for </span><span class="s3">(</span><span class="s4">int </span><span class="s1">j </span><span class="s3">= </span><span class="s1">row_index</span><span class="s3">; </span><span class="s1">j </span><span class="s3">&lt; </span><span class="s1">col</span><span class="s3">-&gt;</span><span class="s1">size </span><span class="s3">- </span><span class="s5">1</span><span class="s3">; </span><span class="s1">j</span><span class="s3">++) {</span>
+                <span class="s1">col</span><span class="s3">-&gt;</span><span class="s1">values</span><span class="s3">[</span><span class="s1">j</span><span class="s3">] = </span><span class="s1">col</span><span class="s3">-&gt;</span><span class="s1">values</span><span class="s3">[</span><span class="s1">j </span><span class="s3">+ </span><span class="s5">1</span><span class="s3">];</span>
+            <span class="s3">}</span>
+            <span class="s1">col</span><span class="s3">-&gt;</span><span class="s1">size</span><span class="s3">--;</span>
+            <span class="s1">col</span><span class="s3">-&gt;</span><span class="s1">values </span><span class="s3">= (</span><span class="s4">int </span><span class="s3">*)</span><span class="s1">realloc</span><span class="s3">(</span><span class="s1">col</span><span class="s3">-&gt;</span><span class="s1">values</span><span class="s3">, </span><span class="s1">col</span><span class="s3">-&gt;</span><span class="s1">size </span><span class="s3">* </span><span class="s4">sizeof</span><span class="s3">(</span><span class="s4">int</span><span class="s3">));</span>
+        <span class="s3">}</span>
+    <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s4">void </span><span class="s1">add_column_to_cdataframe</span><span class="s3">(</span><span class="s1">CDataframe </span><span class="s3">*</span><span class="s1">df</span><span class="s3">, </span><span class="s1">COLUMN </span><span class="s3">*</span><span class="s1">col</span><span class="s3">) {</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">num_columns </span><span class="s3">&gt;= </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">capacity</span><span class="s3">) {</span>
+        <span class="s4">int </span><span class="s1">new_capacity </span><span class="s3">= </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">capacity </span><span class="s3">* </span><span class="s5">2</span><span class="s3">;</span>
+        <span class="s1">COLUMN </span><span class="s3">**</span><span class="s1">new_columns </span><span class="s3">= (</span><span class="s1">COLUMN </span><span class="s3">**)</span><span class="s1">realloc</span><span class="s3">(</span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns</span><span class="s3">, </span><span class="s1">new_capacity </span><span class="s3">* </span><span class="s4">sizeof</span><span class="s3">(</span><span class="s1">COLUMN </span><span class="s3">*));</span>
+        <span class="s4">if </span><span class="s3">(</span><span class="s1">new_columns </span><span class="s3">== </span><span class="s1">NULL</span><span class="s3">) {</span>
+            <span class="s4">return</span><span class="s3">;</span>
+        <span class="s3">}</span>
+        <span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns </span><span class="s3">= </span><span class="s1">new_columns</span><span class="s3">;</span>
+        <span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">capacity </span><span class="s3">= </span><span class="s1">new_capacity</span><span class="s3">;</span>
+    <span class="s3">}</span>
+    <span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns</span><span class="s3">[</span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">num_columns</span><span class="s3">] = </span><span class="s1">col</span><span class="s3">;</span>
+    <span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">num_columns</span><span class="s3">++;</span>
+<span class="s3">}</span>
+
+<span class="s4">void </span><span class="s1">delete_column_from_cdataframe</span><span class="s3">(</span><span class="s1">CDataframe </span><span class="s3">*</span><span class="s1">df</span><span class="s3">, </span><span class="s4">int </span><span class="s1">col_index</span><span class="s3">) {</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">col_index </span><span class="s3">&lt; </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">num_columns</span><span class="s3">) {</span>
+        <span class="s1">delete_column</span><span class="s3">(&amp;</span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns</span><span class="s3">[</span><span class="s1">col_index</span><span class="s3">]);</span>
+        <span class="s4">for </span><span class="s3">(</span><span class="s4">int </span><span class="s1">i </span><span class="s3">= </span><span class="s1">col_index</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">num_columns </span><span class="s3">- </span><span class="s5">1</span><span class="s3">; </span><span class="s1">i</span><span class="s3">++) {</span>
+            <span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns</span><span class="s3">[</span><span class="s1">i</span><span class="s3">] = </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns</span><span class="s3">[</span><span class="s1">i </span><span class="s3">+ </span><span class="s5">1</span><span class="s3">];</span>
+        <span class="s3">}</span>
+        <span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">num_columns</span><span class="s3">--;</span>
+    <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s4">void </span><span class="s1">rename_column_in_cdataframe</span><span class="s3">(</span><span class="s1">CDataframe </span><span class="s3">*</span><span class="s1">df</span><span class="s3">, </span><span class="s4">int </span><span class="s1">col_index</span><span class="s3">, </span><span class="s4">char </span><span class="s3">*</span><span class="s1">new_title</span><span class="s3">) {</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">col_index </span><span class="s3">&lt; </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">num_columns</span><span class="s3">) {</span>
+        <span class="s1">COLUMN </span><span class="s3">*</span><span class="s1">col </span><span class="s3">= </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns</span><span class="s3">[</span><span class="s1">col_index</span><span class="s3">];</span>
+        <span class="s1">free</span><span class="s3">(</span><span class="s1">col</span><span class="s3">-&gt;</span><span class="s1">title</span><span class="s3">);</span>
+        <span class="s1">col</span><span class="s3">-&gt;</span><span class="s1">title </span><span class="s3">= </span><span class="s1">strdup</span><span class="s3">(</span><span class="s1">new_title</span><span class="s3">);</span>
+    <span class="s3">}</span>
+<span class="s3">}</span>
+
+<span class="s4">int </span><span class="s1">search_value_in_cdataframe</span><span class="s3">(</span><span class="s4">const </span><span class="s1">CDataframe </span><span class="s3">*</span><span class="s1">df</span><span class="s3">, </span><span class="s4">int </span><span class="s1">value</span><span class="s3">) {</span>
+    <span class="s4">for </span><span class="s3">(</span><span class="s4">int </span><span class="s1">i </span><span class="s3">= </span><span class="s5">0</span><span class="s3">; </span><span class="s1">i </span><span class="s3">&lt; </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">num_columns</span><span class="s3">; </span><span class="s1">i</span><span class="s3">++) {</span>
+        <span class="s4">for </span><span class="s3">(</span><span class="s4">int </span><span class="s1">j </span><span class="s3">= </span><span class="s5">0</span><span class="s3">; </span><span class="s1">j </span><span class="s3">&lt; </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns</span><span class="s3">[</span><span class="s1">i</span><span class="s3">]-&gt;</span><span class="s1">size</span><span class="s3">; </span><span class="s1">j</span><span class="s3">++) {</span>
+            <span class="s4">if </span><span class="s3">(</span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns</span><span class="s3">[</span><span class="s1">i</span><span class="s3">]-&gt;</span><span class="s1">values</span><span class="s3">[</span><span class="s1">j</span><span class="s3">] == </span><span class="s1">value</span><span class="s3">) {</span>
+                <span class="s4">return </span><span class="s5">1</span><span class="s3">;</span>
+            <span class="s3">}</span>
+        <span class="s3">}</span>
+    <span class="s3">}</span>
+    <span class="s4">return </span><span class="s5">0</span><span class="s3">;</span>
+<span class="s3">}</span>
+
+<span class="s4">int </span><span class="s1">replace_value_in_cdataframe</span><span class="s3">(</span><span class="s1">CDataframe </span><span class="s3">*</span><span class="s1">df</span><span class="s3">, </span><span class="s4">int </span><span class="s1">row</span><span class="s3">, </span><span class="s4">int </span><span class="s1">col</span><span class="s3">, </span><span class="s4">int </span><span class="s1">new_value</span><span class="s3">) {</span>
+    <span class="s4">if </span><span class="s3">(</span><span class="s1">col </span><span class="s3">&lt; </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">num_columns </span><span class="s3">&amp;&amp; </span><span class="s1">row </span><span class="s3">&lt; </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns</span><span class="s3">[</span><span class="s1">col</span><span class="s3">]-&gt;</span><span class="s1">size</span><span class="s3">) {</span>
+        <span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns</span><span class="s3">[</span><span class="s1">col</span><span class="s3">]-&gt;</span><span class="s1">values</span><span class="s3">[</span><span class="s1">row</span><span class="s3">] = </span><span class="s1">new_value</span><span class="s3">;</span>
+        <span class="s4">return </span><span class="s5">1</span><span class="s3">;</span>
+    <span class="s3">}</span>
+    <span class="s4">return </span><span class="s5">0</span><span class="s3">;</span>
+<span class="s3">}</span>
+
+<span class="s4">void </span><span class="s1">display_cdataframe_stats</span><span class="s3">(</span><span class="s4">const </span><span class="s1">CDataframe </span><span class="s3">*</span><span class="s1">df</span><span class="s3">) {</span>
+    <span class="s1">printf</span><span class="s3">(</span><span class="s2">&quot;Number of rows: %zu</span><span class="s4">\n</span><span class="s2">&quot;</span><span class="s3">, </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">columns</span><span class="s3">[</span><span class="s5">0</span><span class="s3">]-&gt;</span><span class="s1">size</span><span class="s3">);</span>
+    <span class="s1">printf</span><span class="s3">(</span><span class="s2">&quot;Number of columns: %d</span><span class="s4">\n</span><span class="s2">&quot;</span><span class="s3">, </span><span class="s1">df</span><span class="s3">-&gt;</span><span class="s1">num_columns</span><span class="s3">);</span>
+<span class="s3">}</span>
+
+</pre>
+</body>
+</html>
